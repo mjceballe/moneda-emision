@@ -7,15 +7,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Estilo personalizado para el gráfico de dona simulado */
         .donut-chart {
             width: 120px;
             height: 120px;
             border-radius: 50%;
             background: conic-gradient(
-                #1e3a8a 0% 70%,   /* ARS - Azul oscuro */
-                #3b82f6 70% 85%,  /* USD - Azul claro */
-                #93c5fd 85% 100%  /* USD Ext. - Celeste */
+                #1e3a8a 0% 70%,   
+                #3b82f6 70% 85%,  
+                #93c5fd 85% 100%  
             );
             position: relative;
             display: flex;
@@ -29,17 +28,15 @@
             background-color: white;
         }
         
-        /* Animación suave para el popover */
+        /* Animación suave para el popover dependiente del peer */
         .popover-content {
             transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
             transform: translateY(10px);
         }
-        /* La animación del hover ahora depende del peer en lugar del group nativo */
         .peer:hover ~ .popover-content {
             transform: translateY(0);
         }
 
-        /* Ocultar scrollbar en la tabla para mantener el diseño limpio */
         .table-container::-webkit-scrollbar {
             height: 6px;
         }
@@ -51,7 +48,7 @@
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans p-4 md:p-8 min-h-screen">
 
-    <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         
         <!-- Header superior -->
         <div class="p-6 border-b border-gray-100 flex justify-between items-center">
@@ -60,10 +57,19 @@
                 <i class="far fa-calendar ml-2 cursor-pointer hover:text-gray-700"></i>
             </div>
             <div class="flex items-center text-sm">
+                <!-- Ícono de Info con Tooltip -->
+                <div id="usd-info-icon" class="hidden relative group mr-2 cursor-help flex items-center">
+                    <i class="fas fa-info-circle text-blue-500 hover:text-blue-600 transition-colors text-sm"></i>
+                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-max px-3 py-1.5 bg-gray-800 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md">
+                        Tipo de cambio: ARS 1.460
+                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                    </div>
+                </div>
+                
                 <span class="mr-2 text-gray-500">Expresar en:</span>
-                <div class="flex bg-gray-100 rounded-md p-0.5">
-                    <button class="px-3 py-1 bg-white text-blue-800 rounded shadow-sm text-xs font-semibold">ARS</button>
-                    <button class="px-3 py-1 text-gray-500 hover:text-gray-700 text-xs font-semibold">USD</button>
+                <div class="flex bg-gray-100 rounded-md p-0.5 transition-colors">
+                    <button id="btn-currency-ars" class="px-3 py-1 bg-white text-blue-800 rounded shadow-sm text-xs font-semibold transition-all">ARS</button>
+                    <button id="btn-currency-usd" class="px-3 py-1 text-gray-500 hover:text-gray-700 text-xs font-semibold transition-all">USD</button>
                 </div>
             </div>
         </div>
@@ -72,17 +78,17 @@
         <div class="px-6 py-4 bg-gray-50/50 flex justify-between items-center border-b border-gray-100">
             <h2 class="text-gray-700 font-medium">Total de la cuenta</h2>
             <div class="text-right">
-                <span class="text-gray-400 text-sm font-medium mr-1">ARS</span>
-                <span class="text-2xl font-bold text-gray-900 tracking-tight">12.442.500<span class="text-sm font-normal text-gray-500">,78</span></span>
+                <span class="val-currency text-gray-400 text-sm font-medium mr-1">ARS</span>
+                <span class="val-money-split text-2xl font-bold text-gray-900 tracking-tight" data-is-total="true">12.442.500<span class="text-sm font-normal text-gray-500">,78</span></span>
             </div>
         </div>
 
         <!-- Sección Inversiones -->
-        <div class="p-6">
-            <h3 class="text-blue-900 font-bold text-xl mb-6">Inversiones</h3>
+        <div class="p-6 px-0 md:px-6">
+            <h3 class="text-blue-900 font-bold text-xl mb-6 px-6">Inversiones</h3>
 
             <!-- Gráfico y Leyenda -->
-            <div class="flex flex-col md:flex-row items-center gap-10 mb-8 pb-8 border-b border-gray-100">
+            <div class="flex flex-col md:flex-row items-center gap-10 mb-8 pb-8 border-b border-gray-100 px-6">
                 <div class="donut-chart shadow-inner">
                     <div class="donut-inner shadow-sm"></div>
                 </div>
@@ -116,17 +122,54 @@
             </div>
 
             <!-- Filtros -->
-            <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
+            <div class="flex flex-wrap justify-between items-center mb-4 gap-4 px-6">
                 <div class="flex gap-2">
-                    <button class="border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-2">
-                        Mercado <i class="fas fa-chevron-down text-xs"></i>
-                    </button>
-                    <button class="border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-2">
-                        Moneda de emisión <i class="fas fa-chevron-down text-xs"></i>
-                    </button>
+                    <div class="relative">
+                        <select id="filter-mercado" class="appearance-none border border-gray-300 rounded pl-3 pr-8 py-1.5 text-sm text-gray-600 hover:bg-gray-50 focus:outline-none focus:border-blue-500 cursor-pointer bg-white">
+                            <option value="todos">Mercado: Todos</option>
+                            <option value="argentina">Argentina</option>
+                            <option value="usa">USA</option>
+                        </select>
+                        <i class="fas fa-chevron-down text-[10px] text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                    </div>
+                    <div class="relative">
+                        <select id="filter-moneda" class="appearance-none border border-gray-300 rounded pl-3 pr-8 py-1.5 text-sm text-gray-600 hover:bg-gray-50 focus:outline-none focus:border-blue-500 cursor-pointer bg-white">
+                            <option value="todos">Moneda: Todas</option>
+                            <option value="ARS">ARS</option>
+                            <option value="USD">USD</option>
+                            <option value="USD Ext">USD Ext.</option>
+                        </select>
+                        <i class="fas fa-chevron-down text-[10px] text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                    </div>
                 </div>
                 <div class="flex items-center gap-4">
-                    <i class="fas fa-arrows-alt-v text-gray-400 cursor-pointer hover:text-gray-600"></i>
+                    
+                    <!-- Split Icon Button para Expandir/Contraer -->
+                    <div class="relative inline-flex items-center z-20">
+                        <div class="flex bg-white border border-gray-300 rounded-md shadow-sm">
+                            <button id="btn-toggle-all-main" class="px-3 py-1.5 text-gray-500 hover:bg-gray-50 hover:text-gray-700 rounded-l-md transition-colors focus:outline-none" title="Expandir/Contraer todo">
+                                <i class="fas fa-arrows-alt-v text-sm"></i>
+                            </button>
+                            <div class="w-px bg-gray-300"></div>
+                            <button id="btn-dropdown-toggle" class="px-2 py-1.5 text-gray-500 hover:bg-gray-50 hover:text-gray-700 rounded-r-md transition-colors focus:outline-none">
+                                <i class="fas fa-caret-down text-sm"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Menú Desplegable -->
+                        <div id="dropdown-menu" class="hidden absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 w-56 py-1 text-sm overflow-hidden">
+                            <button id="btn-expand-categories" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                Expandir sólo categorías
+                            </button>
+                            <button id="btn-expand-details" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                Expandir detalles
+                            </button>
+                            <button id="btn-collapse-all" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors border-t border-gray-100">
+                                Contraer todo
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="flex bg-gray-100 rounded-md p-0.5 border border-gray-200">
                         <button class="px-3 py-1 bg-white text-blue-800 rounded shadow-sm text-sm flex items-center gap-1"><i class="fas fa-table text-xs"></i> Tabla</button>
                         <button class="px-3 py-1 text-gray-500 hover:text-gray-700 text-sm flex items-center gap-1">Gráfico</button>
@@ -138,319 +181,904 @@
             <div class="border-t border-gray-200">
                 
                 <!-- Acordeón 1: Acciones -->
-                <div class="accordion-item border-b border-gray-100">
-                    <div class="accordion-header flex justify-between items-center py-4 px-2 cursor-pointer hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-chevron-right text-blue-600 text-sm w-4 text-center transition-transform duration-200 icon-rotate"></i>
-                            <span class="font-bold text-blue-900 text-lg">Acciones</span>
-                            <span class="bg-blue-50 text-blue-600 font-semibold text-xs px-2 py-0.5 rounded">49,23%</span>
-                        </div>
-                        
-                        <!-- ÁREA DEL POPOVER INTERACTIVO (Usando PEER) -->
-                        <div class="relative">
-                            <div class="peer text-right cursor-help p-1 rounded hover:bg-gray-100 transition-colors">
-                                <span class="text-gray-400 text-xs font-medium mr-1">ARS</span>
-                                <span class="font-bold text-gray-800">6.125.296<span class="text-xs font-normal text-gray-500">,59</span></span>
+                <div class="accordion-item border-b border-gray-100" data-mercados="argentina" data-monedas="ARS">
+                    <div class="accordion-header cursor-pointer hover:bg-gray-50 transition-colors py-4 px-6">
+                        <div class="flex justify-between items-center w-full">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-chevron-right text-blue-600 text-sm w-4 text-center transition-transform duration-200 icon-rotate"></i>
+                                <span class="font-bold text-blue-900 text-lg">Acciones</span>
+                                <span class="bg-blue-50 text-blue-600 font-semibold text-xs px-2 py-0.5 rounded">49,23%</span>
                             </div>
-                            
-                            <!-- Contenido del Popover -->
-                            <div class="popover-content absolute z-50 right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 opacity-0 invisible peer-hover:opacity-100 peer-hover:visible pointer-events-none">
-                                <div class="p-4">
-                                    <h5 class="text-[10px] font-bold text-blue-800 tracking-wider mb-4 uppercase">Por moneda de emisión</h5>
-                                    
-                                    <div class="flex justify-between items-center">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-bold text-sm text-gray-800">ARS</span>
-                                            <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">49,23%</span>
-                                        </div>
-                                        <div class="text-right flex items-center gap-3">
-                                            <span class="text-green-500 text-xs">+170.000,00</span>
-                                            <div>
-                                                <span class="text-gray-400 text-xs mr-1">ARS</span>
-                                                <span class="font-bold text-sm">6.125.296<span class="text-[10px] font-normal text-gray-500">,59</span></span>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <!-- ÁREA DEL POPOVER INTERACTIVO (PEER) -->
+                            <div class="relative">
+                                <div class="peer text-right cursor-help p-1 rounded hover:bg-gray-200 transition-colors">
+                                    <span class="val-currency text-gray-400 text-xs font-medium mr-1">ARS</span>
+                                    <span class="val-money-split font-bold text-gray-800 text-lg" data-is-total="false">6.125.296<span class="text-xs font-normal text-gray-500">,59</span></span>
                                 </div>
-                                <div class="absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-content hidden px-2 pb-4">
-                        <p class="text-sm text-gray-500 italic">Detalle de acciones...</p>
-                    </div>
-                </div>
-
-                <!-- Acordeón 2: Bonos -->
-                <div class="accordion-item border-b border-gray-100">
-                    <div class="accordion-header flex justify-between items-center py-4 px-2 cursor-pointer hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-chevron-down text-blue-600 text-sm w-4 text-center transition-transform duration-200 icon-rotate"></i>
-                            <span class="font-bold text-blue-900 text-lg">Bonos</span>
-                            <span class="bg-blue-50 text-blue-600 font-semibold text-xs px-2 py-0.5 rounded">15,46%</span>
-                        </div>
-                        
-                        <div class="relative">
-                            <div class="peer text-right cursor-help p-1 rounded hover:bg-gray-100 transition-colors">
-                                <span class="text-gray-400 text-xs font-medium mr-1">ARS</span>
-                                <span class="font-bold text-gray-800">1.923.384<span class="text-xs font-normal text-gray-500">,81</span></span>
-                            </div>
-                            
-                            <div class="popover-content absolute z-50 right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 opacity-0 invisible peer-hover:opacity-100 peer-hover:visible pointer-events-none">
-                                <div class="p-4">
-                                    <h5 class="text-[10px] font-bold text-blue-800 tracking-wider mb-4 uppercase">Por moneda de emisión</h5>
-                                    
-                                    <div class="flex justify-between items-center mb-3">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-bold text-sm text-gray-800">ARS</span>
-                                            <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">10,45%</span>
-                                        </div>
-                                        <div class="text-right flex items-center gap-3">
-                                            <span class="text-green-500 text-xs">+425.000,00</span>
-                                            <div>
-                                                <span class="text-gray-400 text-xs mr-1">ARS</span>
-                                                <span class="font-bold text-sm">1.000.000<span class="text-[10px] font-normal text-gray-500">,00</span></span>
+                                <div class="popover-content absolute z-50 right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 opacity-0 invisible peer-hover:opacity-100 peer-hover:visible pointer-events-none">
+                                    <div class="p-4">
+                                        <h5 class="text-[10px] font-bold text-blue-800 tracking-wider mb-4 uppercase">Por moneda de emisión</h5>
+                                        <div class="flex justify-between items-center text-sm">
+                                            <div class="flex items-center gap-2 text-gray-700 font-medium">
+                                                <span class="font-bold text-sm text-gray-800">ARS</span> <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">49,23%</span>
+                                            </div>
+                                            <div class="text-right flex items-center justify-end gap-3">
+                                                <span class="val-money text-green-500 text-xs font-medium">+170.000,00</span>
+                                                <span class="font-bold text-gray-800 text-sm"><span class="val-currency text-xs font-medium text-gray-500 mr-1">ARS</span><span class="val-money">6.125.296,59</span></span>
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    <div class="flex justify-between items-center border-t border-gray-50 pt-3">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-bold text-sm text-gray-800">USD</span>
-                                            <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">5,09%</span>
-                                        </div>
-                                        <div class="text-right flex items-center gap-3">
-                                            <span class="text-green-500 text-xs">+5.000,00</span>
-                                            <div>
-                                                <span class="text-gray-400 text-xs mr-1">ARS</span>
-                                                <span class="font-bold text-sm">20.000<span class="text-[10px] font-normal text-gray-500">,00</span></span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <div class="absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
                                 </div>
-                                <div class="absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="accordion-content block overflow-hidden bg-gray-50/30 rounded-md mb-4 table-container overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[800px]">
-                            <thead>
-                                <tr class="text-xs text-gray-600 font-semibold bg-gray-100/50 border-y border-gray-200">
-                                    <th class="py-3 px-4 font-medium">Símbolo</th>
-                                    <th class="py-3 px-4 font-medium">Moneda de emisión</th>
-                                    <th class="py-3 px-4 text-right font-medium">Cantidad</th>
-                                    <th class="py-3 px-4 text-right font-medium">Precio</th>
-                                    <th class="py-3 px-4 text-right font-medium">% del total</th>
-                                    <th class="py-3 px-4 text-right font-medium">PPP</th>
-                                    <th class="py-3 px-4 text-right font-medium">Var%</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-sm">
-                                <tr class="border-b border-gray-100 hover:bg-white transition-colors">
-                                    <td class="py-3 px-4">
-                                        <div class="flex items-center gap-2">
-                                            <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
-                                            <div>
-                                                <div class="font-bold text-blue-900">AL30</div>
-                                                <div class="text-[10px] text-gray-500 uppercase">Bono Rep. Argentina USD...</div>
+                    <div class="accordion-content hidden">
+                        <div class="table-container overflow-x-auto w-full pb-2">
+                            <table class="w-full text-left border-collapse min-w-[1000px]">
+                                <thead>
+                                    <tr class="text-xs text-gray-600 font-semibold bg-gray-50/80 border-y border-gray-200">
+                                        <th class="py-3 pl-[52px] pr-6 font-medium">Símbolo</th>
+                                        <th class="py-3 px-4 font-medium">Moneda de emisión</th>
+                                        <th class="py-3 px-4 text-right font-medium">Cantidad</th>
+                                        <th class="py-3 px-4 text-right font-medium">Precio</th>
+                                        <th class="py-3 px-4 text-right font-medium">% del total</th>
+                                        <th class="py-3 px-4 text-right font-medium">PPP</th>
+                                        <th class="py-3 px-4 text-right font-medium">Var%</th>
+                                        <th class="py-3 px-4 text-right font-medium">Resultado</th>
+                                        <th class="py-3 px-4 text-center font-medium">Actualizado</th>
+                                        <th class="py-3 px-6 text-right font-medium">Posición</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm">
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors instrument-row cursor-pointer">
+                                        <td class="py-4 pl-[52px] pr-6">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-chevron-right text-gray-400 text-sm w-4 text-center instrument-icon transition-transform"></i>
+                                                <div>
+                                                    <div class="font-bold text-gray-800">CEPU</div>
+                                                    <div class="text-[10px] text-gray-500 uppercase">CENTRAL PUERTO</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium border border-blue-100">ARS</span></td>
+                                        <td class="py-4 px-4 text-right text-gray-700">234</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">1.234,56</td>
+                                        <td class="py-4 px-4 text-right text-gray-700">0,35%</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">118,00</td>
+                                        <td class="py-4 px-4 text-right text-green-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-up text-[10px]"></i> 184,00%</td>
+                                        <td class="py-4 px-4 text-right text-green-500 val-money">+425.000,00</td>
+                                        <td class="py-4 px-4 text-center text-gray-500 text-xs">11:16:55</td>
+                                        <td class="py-4 px-6 text-right font-medium text-gray-800 val-money">56.989,00</td>
+                                    </tr>
+                                    <!-- Detalles CEPU -->
+                                    <tr class="instrument-detail hidden border-b border-gray-50 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">Disponible</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">200</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">1.234,56</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">246.912,00</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-50 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">A liquidar</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">30</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">1.234,56</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">37.036,80</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-100 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">En garantía</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">4</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">1.234,56</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">4.938,24</td>
+                                    </tr>
+
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors instrument-row cursor-pointer">
+                                        <td class="py-4 pl-[52px] pr-6">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-chevron-right text-gray-400 text-sm w-4 text-center instrument-icon transition-transform"></i>
+                                                <div>
+                                                    <div class="font-bold text-gray-800">YPFD</div>
+                                                    <div class="text-[10px] text-gray-500 uppercase">YPF</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium border border-blue-100">ARS</span></td>
+                                        <td class="py-4 px-4 text-right text-gray-700">3.400</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">2.567,89</td>
+                                        <td class="py-4 px-4 text-right text-gray-700">2,74%</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">100,00</td>
+                                        <td class="py-4 px-4 text-right text-green-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-up text-[10px]"></i> 5,67%</td>
+                                        <td class="py-4 px-4 text-right text-green-500 val-money">+116.567,00</td>
+                                        <td class="py-4 px-4 text-center text-gray-500 text-xs">11:16:55</td>
+                                        <td class="py-4 px-6 text-right font-medium text-gray-800 val-money">340.567,89</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-100 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">Disponible</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">3.400</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">2.567,89</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">340.567,89</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-white text-xs font-bold text-gray-800">
+                                        <td colspan="4" class="py-4 pl-[52px] pr-6 border-b border-gray-100">Subtotal</td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100">15,46%</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100 text-gray-800 font-medium val-money">162.913,96</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-6 text-right border-b border-gray-100"><span class="val-currency text-gray-400 font-medium mr-1">ARS</span><span class="val-money">1.923.384,81</span></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acordeón 2: Bonos -->
+                <div class="accordion-item border-b border-gray-100" data-mercados="argentina" data-monedas="ARS,USD">
+                    <div class="accordion-header cursor-pointer hover:bg-gray-50 transition-colors py-4 px-6">
+                        <div class="flex justify-between items-center w-full">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-chevron-right text-blue-600 text-sm w-4 text-center transition-transform duration-200 icon-rotate"></i>
+                                <span class="font-bold text-blue-900 text-lg">Bonos</span>
+                                <span class="bg-blue-50 text-blue-600 font-semibold text-xs px-2 py-0.5 rounded">15,46%</span>
+                            </div>
+                            <div class="relative">
+                                <div class="peer text-right cursor-help p-1 rounded hover:bg-gray-200 transition-colors">
+                                    <span class="val-currency text-gray-400 text-xs font-medium mr-1">ARS</span>
+                                    <span class="val-money-split font-bold text-gray-800 text-lg" data-is-total="false">1.923.384<span class="text-xs font-normal text-gray-500">,81</span></span>
+                                </div>
+                                <div class="popover-content absolute z-50 right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 opacity-0 invisible peer-hover:opacity-100 peer-hover:visible pointer-events-none">
+                                    <div class="p-4">
+                                        <h5 class="text-[10px] font-bold text-blue-800 tracking-wider mb-4 uppercase">Por moneda de emisión</h5>
+                                        <div class="flex justify-between items-center mb-3 text-sm">
+                                            <div class="flex items-center gap-2 text-gray-700 font-medium">
+                                                <span class="font-bold text-sm text-gray-800">ARS</span> <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">10,45%</span>
+                                            </div>
+                                            <div class="text-right flex items-center justify-end gap-3">
+                                                <span class="val-money text-green-500 text-xs font-medium">+425.000,00</span>
+                                                <span class="font-bold text-gray-800 text-sm"><span class="val-currency text-xs font-medium text-gray-500 mr-1">ARS</span><span class="val-money">1.000.000,00</span></span>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td class="py-3 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium">USD</span></td>
-                                    <td class="py-3 px-4 text-right text-gray-700">234</td>
-                                    <td class="py-3 px-4 text-right text-gray-700">1.234,56</td>
-                                    <td class="py-3 px-4 text-right text-gray-700">0,46%</td>
-                                    <td class="py-3 px-4 text-right text-gray-700">118,00</td>
-                                    <td class="py-3 px-4 text-right text-green-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-up text-[10px]"></i> 2,12%</td>
-                                </tr>
-                                <tr class="border-b border-gray-100 hover:bg-white transition-colors">
-                                    <td class="py-3 px-4">
-                                        <div class="flex items-center gap-2">
-                                            <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
-                                            <div>
-                                                <div class="font-bold text-blue-900">AL28</div>
-                                                <div class="text-[10px] text-gray-500 uppercase">Bono Rep Argentina USD 1%</div>
+                                        <div class="flex justify-between items-center border-t border-gray-50 pt-3 text-sm">
+                                            <div class="flex items-center gap-2 text-gray-700 font-medium">
+                                                <span class="font-bold text-sm text-gray-800">USD</span> <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">5,09%</span>
+                                            </div>
+                                            <div class="text-right flex items-center justify-end gap-3">
+                                                <span class="val-money text-green-500 text-xs font-medium">+5.020,00</span>
+                                                <span class="font-bold text-gray-800 text-sm"><span class="val-currency text-xs font-medium text-gray-500 mr-1">ARS</span><span class="val-money">23.956,00</span></span>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td class="py-3 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium">USD</span></td>
-                                    <td class="py-3 px-4 text-right text-gray-700">3.400</td>
-                                    <td class="py-3 px-4 text-right text-gray-700">2.567,89</td>
-                                    <td class="py-3 px-4 text-right text-gray-700">2,74%</td>
-                                    <td class="py-3 px-4 text-right text-gray-700">100,00</td>
-                                    <td class="py-3 px-4 text-right text-green-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-up text-[10px]"></i> 5,67%</td>
-                                </tr>
-                                <tr class="border-b border-gray-100 hover:bg-white transition-colors">
-                                    <td class="py-3 px-4">
-                                        <div class="flex items-center gap-2">
-                                            <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
-                                            <div>
-                                                <div class="font-bold text-blue-900">DICP</div>
-                                                <div class="text-[10px] text-gray-500 uppercase">Bonos Rep Arg C/Descuent...</div>
+                                    </div>
+                                    <div class="absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-content hidden">
+                        <div class="table-container overflow-x-auto w-full pb-2">
+                            <table class="w-full text-left border-collapse min-w-[1000px]">
+                                <thead>
+                                    <tr class="text-xs text-gray-600 font-semibold bg-gray-50/80 border-y border-gray-200">
+                                        <th class="py-3 pl-[52px] pr-6 font-medium">Símbolo</th>
+                                        <th class="py-3 px-4 font-medium">Moneda de emisión</th>
+                                        <th class="py-3 px-4 text-right font-medium">Cantidad</th>
+                                        <th class="py-3 px-4 text-right font-medium">Precio</th>
+                                        <th class="py-3 px-4 text-right font-medium">% del total</th>
+                                        <th class="py-3 px-4 text-right font-medium">PPP</th>
+                                        <th class="py-3 px-4 text-right font-medium">Var%</th>
+                                        <th class="py-3 px-4 text-right font-medium">Resultado</th>
+                                        <th class="py-3 px-4 text-center font-medium">Actualizado</th>
+                                        <th class="py-3 px-6 text-right font-medium">Posición</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm">
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors instrument-row cursor-pointer">
+                                        <td class="py-4 pl-[52px] pr-6">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-chevron-right text-gray-400 text-sm w-4 text-center instrument-icon transition-transform"></i>
+                                                <div>
+                                                    <div class="font-bold text-gray-800">AL30</div>
+                                                    <div class="text-[10px] text-gray-500 uppercase">BONO REP. ARGENTINA USD...</div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium">ARS</span></td>
-                                    <td class="py-3 px-4 text-right text-gray-700">2.336</td>
-                                    <td class="py-3 px-4 text-right text-gray-700">3.456,98</td>
-                                    <td class="py-3 px-4 text-right text-gray-700">0,99%</td>
-                                    <td class="py-3 px-4 text-right text-gray-700">980,00</td>
-                                    <td class="py-3 px-4 text-right text-green-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-up text-[10px]"></i> 0,56%</td>
-                                </tr>
-                                <tr class="border-b border-gray-100 hover:bg-white transition-colors">
-                                    <td class="py-3 px-4">
-                                        <div class="flex items-center gap-2">
-                                            <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
-                                            <div>
-                                                <div class="font-bold text-blue-900">GD35</div>
-                                                <div class="text-[10px] text-gray-500 uppercase">Bonos Rep. Arg. U$S Step Up</div>
+                                        </td>
+                                        <td class="py-4 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium border border-blue-100">USD</span></td>
+                                        <td class="py-4 px-4 text-right text-gray-700">234</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">1.234,56</td>
+                                        <td class="py-4 px-4 text-right text-gray-700">0,46%</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">118,00</td>
+                                        <td class="py-4 px-4 text-right text-green-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-up text-[10px]"></i> 2,12%</td>
+                                        <td class="py-4 px-4 text-right text-green-500 val-money">+425.000,00</td>
+                                        <td class="py-4 px-4 text-center text-gray-500 text-xs">11:16:55</td>
+                                        <td class="py-4 px-6 text-right font-medium text-gray-800 val-money">56.989,00</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-100 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">Disponible</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">234</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">1.234,56</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">56.989,00</td>
+                                    </tr>
+
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors instrument-row cursor-pointer">
+                                        <td class="py-4 pl-[52px] pr-6">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-chevron-right text-gray-400 text-sm w-4 text-center instrument-icon transition-transform"></i>
+                                                <div>
+                                                    <div class="font-bold text-gray-800">AL29</div>
+                                                    <div class="text-[10px] text-gray-500 uppercase">BONO REP ARGENTINA USD 1%</div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium">USD</span></td>
-                                    <td class="py-3 px-4 text-right text-gray-700">23.456</td>
-                                    <td class="py-3 px-4 text-right text-gray-700">3.456,98</td>
-                                    <td class="py-3 px-4 text-right text-gray-700">0,32%</td>
-                                    <td class="py-3 px-4 text-right text-gray-700">1.345,00</td>
-                                    <td class="py-3 px-4 text-right text-red-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-down text-[10px]"></i> 2,56%</td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                                <tr class="bg-white border-t-2 border-gray-100 text-xs font-bold text-gray-800">
-                                    <td colspan="4" class="py-3 px-4">Subtotal</td>
-                                    <td class="py-3 px-4 text-right">15,46%</td>
-                                    <td class="py-3 px-4 text-right"></td>
-                                    <td class="py-3 px-4 text-right">
-                                        <span class="text-gray-400 font-medium mr-1">ARS</span>
-                                        1.923.384,81
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
+                                        </td>
+                                        <td class="py-4 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium border border-blue-100">USD</span></td>
+                                        <td class="py-4 px-4 text-right text-gray-700">3.400</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">2.567,89</td>
+                                        <td class="py-4 px-4 text-right text-gray-700">2,74%</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">100,00</td>
+                                        <td class="py-4 px-4 text-right text-green-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-up text-[10px]"></i> 5,67%</td>
+                                        <td class="py-4 px-4 text-right text-green-500 val-money">+116.567,00</td>
+                                        <td class="py-4 px-4 text-center text-gray-500 text-xs">11:16:55</td>
+                                        <td class="py-4 px-6 text-right font-medium text-gray-800 val-money">340.567,89</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-100 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">Disponible</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">3.400</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">2.567,89</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">340.567,89</td>
+                                    </tr>
+                                    
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors instrument-row cursor-pointer">
+                                        <td class="py-4 pl-[52px] pr-6">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-chevron-right text-gray-400 text-sm w-4 text-center instrument-icon transition-transform"></i>
+                                                <div>
+                                                    <div class="font-bold text-gray-800">DICP</div>
+                                                    <div class="text-[10px] text-gray-500 uppercase">BONOS REP ARG C/DESCUENTO</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium border border-blue-100">ARS</span></td>
+                                        <td class="py-4 px-4 text-right text-gray-700">2.336</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">3.456,98</td>
+                                        <td class="py-4 px-4 text-right text-gray-700">0,99%</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">980,00</td>
+                                        <td class="py-4 px-4 text-right text-green-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-up text-[10px]"></i> 0,56%</td>
+                                        <td class="py-4 px-4 text-right text-green-500 val-money">+5.567,00</td>
+                                        <td class="py-4 px-4 text-center text-gray-500 text-xs">11:16:55</td>
+                                        <td class="py-4 px-6 text-right font-medium text-gray-800 val-money">123.456,98</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-100 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">Disponible</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">2.336</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">3.456,98</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">123.456,98</td>
+                                    </tr>
+
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors instrument-row cursor-pointer">
+                                        <td class="py-4 pl-[52px] pr-6">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-chevron-right text-gray-400 text-sm w-4 text-center instrument-icon transition-transform"></i>
+                                                <div>
+                                                    <div class="font-bold text-gray-800">GD35</div>
+                                                    <div class="text-[10px] text-gray-500 uppercase">BONOS REP. ARG. U$S STEP UP</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium border border-blue-100">USD</span></td>
+                                        <td class="py-4 px-4 text-right text-gray-700">23.456</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">3.456,98</td>
+                                        <td class="py-4 px-4 text-right text-gray-700">0,32%</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">1.345,00</td>
+                                        <td class="py-4 px-4 text-right text-red-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-down text-[10px]"></i> 2,56%</td>
+                                        <td class="py-4 px-4 text-right text-red-500 val-money">-1.185.000,00</td>
+                                        <td class="py-4 px-4 text-center text-gray-500 text-xs">11:16:55</td>
+                                        <td class="py-4 px-6 text-right font-medium text-gray-800 val-money">39.456,98</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-100 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">Disponible</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">23.456</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">3.456,98</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">39.456,98</td>
+                                    </tr>
+
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors instrument-row cursor-pointer">
+                                        <td class="py-4 pl-[52px] pr-6">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-chevron-right text-gray-400 text-sm w-4 text-center instrument-icon transition-transform"></i>
+                                                <div>
+                                                    <div class="font-bold text-gray-800">TX26</div>
+                                                    <div class="text-[10px] text-gray-500 uppercase">BONO DEL TESORO BONCER 2%</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium border border-blue-100">ARS</span></td>
+                                        <td class="py-4 px-4 text-right text-gray-700">23.456</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">3.456,98</td>
+                                        <td class="py-4 px-4 text-right text-gray-700">0,32%</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">1.345,00</td>
+                                        <td class="py-4 px-4 text-right text-red-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-down text-[10px]"></i> 5,12%</td>
+                                        <td class="py-4 px-4 text-right text-red-500 val-money">-1.185.000,00</td>
+                                        <td class="py-4 px-4 text-center text-gray-500 text-xs">11:16:55</td>
+                                        <td class="py-4 px-6 text-right font-medium text-gray-800 val-money">39.456,98</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-100 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">Disponible</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">23.456</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">3.456,98</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">39.456,98</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-white text-xs font-bold text-gray-800">
+                                        <td colspan="4" class="py-4 pl-[52px] pr-6 border-b border-gray-100">Subtotal</td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100">15,46%</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100 text-gray-800 font-medium val-money">162.913,96</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-6 text-right border-b border-gray-100"><span class="val-currency text-gray-400 font-medium mr-1">ARS</span><span class="val-money">1.923.384,81</span></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Acordeón 3: Cedears -->
-                <div class="accordion-item border-b border-gray-100">
-                    <div class="accordion-header flex justify-between items-center py-4 px-2 cursor-pointer hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-chevron-right text-blue-600 text-sm w-4 text-center transition-transform duration-200 icon-rotate"></i>
-                            <span class="font-bold text-blue-900 text-lg">Cedears</span>
-                            <span class="bg-blue-50 text-blue-600 font-semibold text-xs px-2 py-0.5 rounded">9,64%</span>
-                        </div>
-                        <div class="relative">
-                            <div class="peer text-right cursor-help p-1 rounded hover:bg-gray-100 transition-colors">
-                                <span class="text-gray-400 text-xs font-medium mr-1">ARS</span>
-                                <span class="font-bold text-gray-800">1.200.000<span class="text-xs font-normal text-gray-500">,00</span></span>
+                <div class="accordion-item border-b border-gray-100" data-mercados="argentina" data-monedas="ARS">
+                    <div class="accordion-header cursor-pointer hover:bg-gray-50 transition-colors py-4 px-6">
+                        <div class="flex justify-between items-center w-full">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-chevron-right text-blue-600 text-sm w-4 text-center transition-transform duration-200 icon-rotate"></i>
+                                <span class="font-bold text-blue-900 text-lg">Cedears</span>
+                                <span class="bg-blue-50 text-blue-600 font-semibold text-xs px-2 py-0.5 rounded">9,64%</span>
                             </div>
-                            <div class="popover-content absolute z-50 right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 opacity-0 invisible peer-hover:opacity-100 peer-hover:visible pointer-events-none">
-                                <div class="p-4">
-                                    <h5 class="text-[10px] font-bold text-blue-800 tracking-wider mb-4 uppercase">Por moneda de emisión</h5>
-                                    <div class="flex justify-between items-center">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-bold text-sm text-gray-800">USD Ext.</span>
-                                            <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">14,40%</span>
-                                        </div>
-                                        <div class="text-right flex items-center gap-3">
-                                            <span class="text-green-500 text-xs">+10.500,00</span>
-                                            <div>
-                                                <span class="text-gray-400 text-xs mr-1">ARS</span>
-                                                <span class="font-bold text-sm">1.791.619<span class="text-[10px] font-normal text-gray-500">,38</span></span>
+                            <div class="relative">
+                                <div class="peer text-right cursor-help p-1 rounded hover:bg-gray-200 transition-colors">
+                                    <span class="val-currency text-gray-400 text-xs font-medium mr-1">ARS</span>
+                                    <span class="val-money-split font-bold text-gray-800 text-lg" data-is-total="false">1.200.000<span class="text-xs font-normal text-gray-500">,00</span></span>
+                                </div>
+                                <div class="popover-content absolute z-50 right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 opacity-0 invisible peer-hover:opacity-100 peer-hover:visible pointer-events-none">
+                                    <div class="p-4">
+                                        <h5 class="text-[10px] font-bold text-blue-800 tracking-wider mb-4 uppercase">Por moneda de emisión</h5>
+                                        <div class="flex justify-between items-center text-sm">
+                                            <div class="flex items-center gap-2 text-gray-700 font-medium">
+                                                <span class="font-bold text-sm text-gray-800">ARS</span> <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">9,64%</span>
+                                            </div>
+                                            <div class="text-right flex items-center justify-end gap-3">
+                                                <span class="val-money text-green-500 text-xs font-medium">+15.000,00</span>
+                                                <span class="font-bold text-gray-800 text-sm"><span class="val-currency text-xs font-medium text-gray-500 mr-1">ARS</span><span class="val-money">1.200.000,00</span></span>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
                                 </div>
-                                <div class="absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="accordion-content hidden px-2 pb-4">
-                        <p class="text-sm text-gray-500 italic">Detalle de ETFs...</p>
+                    
+                    <div class="accordion-content hidden">
+                        <div class="table-container overflow-x-auto w-full pb-2">
+                            <table class="w-full text-left border-collapse min-w-[1000px]">
+                                <thead>
+                                    <tr class="text-xs text-gray-600 font-semibold bg-gray-50/80 border-y border-gray-200">
+                                        <th class="py-3 pl-[52px] pr-6 font-medium">Símbolo</th>
+                                        <th class="py-3 px-4 font-medium">Moneda de emisión</th>
+                                        <th class="py-3 px-4 text-right font-medium">Cantidad</th>
+                                        <th class="py-3 px-4 text-right font-medium">Precio</th>
+                                        <th class="py-3 px-4 text-right font-medium">% del total</th>
+                                        <th class="py-3 px-4 text-right font-medium">PPP</th>
+                                        <th class="py-3 px-4 text-right font-medium">Var%</th>
+                                        <th class="py-3 px-4 text-right font-medium">Resultado</th>
+                                        <th class="py-3 px-4 text-center font-medium">Actualizado</th>
+                                        <th class="py-3 px-6 text-right font-medium">Posición</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm">
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors instrument-row cursor-pointer">
+                                        <td class="py-4 pl-[52px] pr-6">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-chevron-right text-gray-400 text-sm w-4 text-center instrument-icon transition-transform"></i>
+                                                <div>
+                                                    <div class="font-bold text-gray-800">AAPL</div>
+                                                    <div class="text-[10px] text-gray-500 uppercase">APPLE INC.</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium border border-blue-100">ARS</span></td>
+                                        <td class="py-4 px-4 text-right text-gray-700">10</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">120.000,00</td>
+                                        <td class="py-4 px-4 text-right text-gray-700">9,64%</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">118.500,00</td>
+                                        <td class="py-4 px-4 text-right text-green-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-up text-[10px]"></i> 1,26%</td>
+                                        <td class="py-4 px-4 text-right text-green-500 val-money">+15.000,00</td>
+                                        <td class="py-4 px-4 text-center text-gray-500 text-xs">15:45:12</td>
+                                        <td class="py-4 px-6 text-right font-medium text-gray-800 val-money">1.200.000,00</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-100 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">Disponible</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">10</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">120.000,00</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">1.200.000,00</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-white text-xs font-bold text-gray-800">
+                                        <td colspan="4" class="py-4 pl-[52px] pr-6 border-b border-gray-100">Subtotal</td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100">9,64%</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100 text-green-600 font-medium val-money">+15.000,00</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-6 text-right border-b border-gray-100"><span class="val-currency text-gray-400 font-medium mr-1">ARS</span><span class="val-money">1.200.000,00</span></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acordeón 4: ETF -->
+                <div class="accordion-item border-b border-gray-100" data-mercados="usa" data-monedas="USD Ext">
+                    <div class="accordion-header cursor-pointer hover:bg-gray-50 transition-colors py-4 px-6">
+                        <div class="flex justify-between items-center w-full">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-chevron-right text-blue-600 text-sm w-4 text-center transition-transform duration-200 icon-rotate"></i>
+                                <span class="font-bold text-blue-900 text-lg">ETF</span>
+                                <span class="bg-blue-50 text-blue-600 font-semibold text-xs px-2 py-0.5 rounded">14,40%</span>
+                            </div>
+                            <div class="relative">
+                                <div class="peer text-right cursor-help p-1 rounded hover:bg-gray-200 transition-colors">
+                                    <span class="val-currency text-gray-400 text-xs font-medium mr-1">ARS</span>
+                                    <span class="val-money-split font-bold text-gray-800 text-lg" data-is-total="false">1.791.619<span class="text-xs font-normal text-gray-500">,38</span></span>
+                                </div>
+                                <div class="popover-content absolute z-50 right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 opacity-0 invisible peer-hover:opacity-100 peer-hover:visible pointer-events-none">
+                                    <div class="p-4">
+                                        <h5 class="text-[10px] font-bold text-blue-800 tracking-wider mb-4 uppercase">Por moneda de emisión</h5>
+                                        <div class="flex justify-between items-center text-sm">
+                                            <div class="flex items-center gap-2 text-gray-700 font-medium">
+                                                <span class="font-bold text-sm text-gray-800">USD Ext.</span> <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">14,40%</span>
+                                            </div>
+                                            <div class="text-right flex items-center justify-end gap-3">
+                                                <span class="val-money text-green-500 text-xs font-medium">+10.500,00</span>
+                                                <span class="font-bold text-gray-800 text-sm"><span class="val-currency text-xs font-medium text-gray-500 mr-1">ARS</span><span class="val-money">1.791.619,38</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-content hidden">
+                        <div class="table-container overflow-x-auto w-full pb-2">
+                            <table class="w-full text-left border-collapse min-w-[1000px]">
+                                <thead>
+                                    <tr class="text-xs text-gray-600 font-semibold bg-gray-50/80 border-y border-gray-200">
+                                        <th class="py-3 pl-[52px] pr-6 font-medium">Símbolo</th>
+                                        <th class="py-3 px-4 font-medium">Moneda de emisión</th>
+                                        <th class="py-3 px-4 text-right font-medium">Cantidad</th>
+                                        <th class="py-3 px-4 text-right font-medium">Precio</th>
+                                        <th class="py-3 px-4 text-right font-medium">% del total</th>
+                                        <th class="py-3 px-4 text-right font-medium">PPP</th>
+                                        <th class="py-3 px-4 text-right font-medium">Var%</th>
+                                        <th class="py-3 px-4 text-right font-medium">Resultado</th>
+                                        <th class="py-3 px-4 text-center font-medium">Actualizado</th>
+                                        <th class="py-3 px-6 text-right font-medium">Posición</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm">
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors instrument-row cursor-pointer">
+                                        <td class="py-4 pl-[52px] pr-6">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-chevron-right text-gray-400 text-sm w-4 text-center instrument-icon transition-transform"></i>
+                                                <div>
+                                                    <div class="font-bold text-gray-800">SPY</div>
+                                                    <div class="text-[10px] text-gray-500 uppercase">SPDR S&P 500 ETF TRUST</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium border border-blue-100">USD Ext.</span></td>
+                                        <td class="py-4 px-4 text-right text-gray-700">3</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">597.206,46</td>
+                                        <td class="py-4 px-4 text-right text-gray-700">14,40%</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">593.706,46</td>
+                                        <td class="py-4 px-4 text-right text-green-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-up text-[10px]"></i> 0,58%</td>
+                                        <td class="py-4 px-4 text-right text-green-500 val-money">+10.500,00</td>
+                                        <td class="py-4 px-4 text-center text-gray-500 text-xs">15:40:02</td>
+                                        <td class="py-4 px-6 text-right font-medium text-gray-800 val-money">1.791.619,38</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-100 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">Disponible</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">3</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">597.206,46</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">1.791.619,38</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-white text-xs font-bold text-gray-800">
+                                        <td colspan="4" class="py-4 pl-[52px] pr-6 border-b border-gray-100">Subtotal</td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100">14,40%</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100 text-green-600 font-medium val-money">+10.500,00</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-6 text-right border-b border-gray-100"><span class="val-currency text-gray-400 font-medium mr-1">ARS</span><span class="val-money">1.791.619,38</span></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Acordeón 5: Letras -->
-                <div class="accordion-item border-b border-gray-100">
-                    <div class="accordion-header flex justify-between items-center py-4 px-2 cursor-pointer hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-chevron-right text-blue-600 text-sm w-4 text-center transition-transform duration-200 icon-rotate"></i>
-                            <span class="font-bold text-blue-900 text-lg">Letras</span>
-                            <span class="bg-blue-50 text-blue-600 font-semibold text-xs px-2 py-0.5 rounded">6,43%</span>
-                        </div>
-                        <div class="relative">
-                            <div class="peer text-right cursor-help p-1 rounded hover:bg-gray-100 transition-colors">
-                                <span class="text-gray-400 text-xs font-medium mr-1">ARS</span>
-                                <span class="font-bold text-gray-800">800.000<span class="text-xs font-normal text-gray-500">,00</span></span>
+                <div class="accordion-item border-b border-gray-100" data-mercados="argentina" data-monedas="ARS">
+                    <div class="accordion-header cursor-pointer hover:bg-gray-50 transition-colors py-4 px-6">
+                        <div class="flex justify-between items-center w-full">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-chevron-right text-blue-600 text-sm w-4 text-center transition-transform duration-200 icon-rotate"></i>
+                                <span class="font-bold text-blue-900 text-lg">Letras</span>
+                                <span class="bg-blue-50 text-blue-600 font-semibold text-xs px-2 py-0.5 rounded">6,43%</span>
                             </div>
-                            <div class="popover-content absolute z-50 right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 opacity-0 invisible peer-hover:opacity-100 peer-hover:visible pointer-events-none">
-                                <div class="p-4">
-                                    <h5 class="text-[10px] font-bold text-blue-800 tracking-wider mb-4 uppercase">Por moneda de emisión</h5>
-                                    <div class="flex justify-between items-center">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-bold text-sm text-gray-800">ARS</span>
-                                            <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">6,43%</span>
-                                        </div>
-                                        <div class="text-right flex items-center gap-3">
-                                            <span class="text-green-500 text-xs">+8.000,00</span>
-                                            <div>
-                                                <span class="text-gray-400 text-xs mr-1">ARS</span>
-                                                <span class="font-bold text-sm">800.000<span class="text-[10px] font-normal text-gray-500">,00</span></span>
+                            <div class="relative">
+                                <div class="peer text-right cursor-help p-1 rounded hover:bg-gray-200 transition-colors">
+                                    <span class="val-currency text-gray-400 text-xs font-medium mr-1">ARS</span>
+                                    <span class="val-money-split font-bold text-gray-800 text-lg" data-is-total="false">800.000<span class="text-xs font-normal text-gray-500">,00</span></span>
+                                </div>
+                                <div class="popover-content absolute z-50 right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 opacity-0 invisible peer-hover:opacity-100 peer-hover:visible pointer-events-none">
+                                    <div class="p-4">
+                                        <h5 class="text-[10px] font-bold text-blue-800 tracking-wider mb-4 uppercase">Por moneda de emisión</h5>
+                                        <div class="flex justify-between items-center text-sm">
+                                            <div class="flex items-center gap-2 text-gray-700 font-medium">
+                                                <span class="font-bold text-sm text-gray-800">ARS</span> <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">6,43%</span>
+                                            </div>
+                                            <div class="text-right flex items-center justify-end gap-3">
+                                                <span class="val-money text-green-500 text-xs font-medium">+8.000,00</span>
+                                                <span class="font-bold text-gray-800 text-sm"><span class="val-currency text-xs font-medium text-gray-500 mr-1">ARS</span><span class="val-money">800.000,00</span></span>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
                                 </div>
-                                <div class="absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="accordion-content hidden px-2 pb-4">
-                        <p class="text-sm text-gray-500 italic">Detalle de letras...</p>
+                    
+                    <div class="accordion-content hidden">
+                        <div class="table-container overflow-x-auto w-full pb-2">
+                            <table class="w-full text-left border-collapse min-w-[1000px]">
+                                <thead>
+                                    <tr class="text-xs text-gray-600 font-semibold bg-gray-50/80 border-y border-gray-200">
+                                        <th class="py-3 pl-[52px] pr-6 font-medium">Símbolo</th>
+                                        <th class="py-3 px-4 font-medium">Moneda de emisión</th>
+                                        <th class="py-3 px-4 text-right font-medium">Cantidad</th>
+                                        <th class="py-3 px-4 text-right font-medium">Precio</th>
+                                        <th class="py-3 px-4 text-right font-medium">% del total</th>
+                                        <th class="py-3 px-4 text-right font-medium">PPP</th>
+                                        <th class="py-3 px-4 text-right font-medium">Var%</th>
+                                        <th class="py-3 px-4 text-right font-medium">Resultado</th>
+                                        <th class="py-3 px-4 text-center font-medium">Actualizado</th>
+                                        <th class="py-3 px-6 text-right font-medium">Posición</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm">
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors instrument-row cursor-pointer">
+                                        <td class="py-4 pl-[52px] pr-6">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-chevron-right text-gray-400 text-sm w-4 text-center instrument-icon transition-transform"></i>
+                                                <div>
+                                                    <div class="font-bold text-gray-800">S31O4</div>
+                                                    <div class="text-[10px] text-gray-500 uppercase">LETRA DEL TESORO</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium border border-blue-100">ARS</span></td>
+                                        <td class="py-4 px-4 text-right text-gray-700">800</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">1.000,00</td>
+                                        <td class="py-4 px-4 text-right text-gray-700">6,43%</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">990,00</td>
+                                        <td class="py-4 px-4 text-right text-green-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-up text-[10px]"></i> 1,01%</td>
+                                        <td class="py-4 px-4 text-right text-green-500 val-money">+8.000,00</td>
+                                        <td class="py-4 px-4 text-center text-gray-500 text-xs">13:10:00</td>
+                                        <td class="py-4 px-6 text-right font-medium text-gray-800 val-money">800.000,00</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-100 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">Disponible</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">800</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">1.000,00</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">800.000,00</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-white text-xs font-bold text-gray-800">
+                                        <td colspan="4" class="py-4 pl-[52px] pr-6 border-b border-gray-100">Subtotal</td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100">6,43%</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100 text-green-600 font-medium val-money">+8.000,00</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-6 text-right border-b border-gray-100"><span class="val-currency text-gray-400 font-medium mr-1">ARS</span><span class="val-money">800.000,00</span></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Acordeón 6: Otros -->
-                <div class="accordion-item border-b border-gray-100">
-                    <div class="accordion-header flex justify-between items-center py-4 px-2 cursor-pointer hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-chevron-right text-blue-600 text-sm w-4 text-center transition-transform duration-200 icon-rotate"></i>
-                            <span class="font-bold text-blue-900 text-lg">Otros</span>
-                            <span class="bg-blue-50 text-blue-600 font-semibold text-xs px-2 py-0.5 rounded">4,84%</span>
-                        </div>
-                        <div class="relative">
-                            <div class="peer text-right cursor-help p-1 rounded hover:bg-gray-100 transition-colors">
-                                <span class="text-gray-400 text-xs font-medium mr-1">ARS</span>
-                                <span class="font-bold text-gray-800">602.199<span class="text-xs font-normal text-gray-500">,22</span></span>
+                <!-- Acordeón 6: ON -->
+                <div class="accordion-item border-b border-gray-100" data-mercados="argentina" data-monedas="ARS,USD">
+                    <div class="accordion-header cursor-pointer hover:bg-gray-50 transition-colors py-4 px-6">
+                        <div class="flex justify-between items-center w-full">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-chevron-right text-blue-600 text-sm w-4 text-center transition-transform duration-200 icon-rotate"></i>
+                                <span class="font-bold text-blue-900 text-lg">ON</span>
+                                <span class="bg-blue-50 text-blue-600 font-semibold text-xs px-2 py-0.5 rounded">8,00%</span>
                             </div>
-                            <div class="popover-content absolute z-50 right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 opacity-0 invisible peer-hover:opacity-100 peer-hover:visible pointer-events-none">
-                                <div class="p-4">
-                                    <h5 class="text-[10px] font-bold text-blue-800 tracking-wider mb-4 uppercase">Por moneda de emisión</h5>
-                                    <div class="flex justify-between items-center">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-bold text-sm text-gray-800">ARS</span>
-                                            <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">4,84%</span>
+                            <div class="relative">
+                                <div class="peer text-right cursor-help p-1 rounded hover:bg-gray-200 transition-colors">
+                                    <span class="val-currency text-gray-400 text-xs font-medium mr-1">ARS</span>
+                                    <span class="val-money-split font-bold text-gray-800 text-lg" data-is-total="false">995.400<span class="text-xs font-normal text-gray-500">,00</span></span>
+                                </div>
+                                <div class="popover-content absolute z-50 right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 opacity-0 invisible peer-hover:opacity-100 peer-hover:visible pointer-events-none">
+                                    <div class="p-4">
+                                        <h5 class="text-[10px] font-bold text-blue-800 tracking-wider mb-4 uppercase">Por moneda de emisión</h5>
+                                        <div class="flex justify-between items-center mb-3 text-sm">
+                                            <div class="flex items-center gap-2 text-gray-700 font-medium">
+                                                <span class="font-bold text-sm text-gray-800">ARS</span> <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">5,00%</span>
+                                            </div>
+                                            <div class="text-right flex items-center justify-end gap-3">
+                                                <span class="val-money text-green-500 text-xs font-medium">+5.000,00</span>
+                                                <span class="font-bold text-gray-800 text-sm"><span class="val-currency text-xs font-medium text-gray-500 mr-1">ARS</span><span class="val-money">622.125,00</span></span>
+                                            </div>
                                         </div>
-                                        <div class="text-right flex items-center gap-3">
-                                            <span class="text-gray-500 text-xs">0,00</span>
-                                            <div>
-                                                <span class="text-gray-400 text-xs mr-1">ARS</span>
-                                                <span class="font-bold text-sm">602.199<span class="text-[10px] font-normal text-gray-500">,22</span></span>
+                                        <div class="flex justify-between items-center border-t border-gray-50 pt-3 text-sm">
+                                            <div class="flex items-center gap-2 text-gray-700 font-medium">
+                                                <span class="font-bold text-sm text-gray-800">USD</span> <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">3,00%</span>
+                                            </div>
+                                            <div class="text-right flex items-center justify-end gap-3">
+                                                <span class="val-money text-green-500 text-xs font-medium">+2.100,00</span>
+                                                <span class="font-bold text-gray-800 text-sm"><span class="val-currency text-xs font-medium text-gray-500 mr-1">ARS</span><span class="val-money">373.275,00</span></span>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
                                 </div>
-                                <div class="absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="accordion-content hidden px-2 pb-4">
-                        <p class="text-sm text-gray-500 italic">Detalle de otros instrumentos...</p>
+                    
+                    <div class="accordion-content hidden">
+                        <div class="table-container overflow-x-auto w-full pb-2">
+                            <table class="w-full text-left border-collapse min-w-[1000px]">
+                                <thead>
+                                    <tr class="text-xs text-gray-600 font-semibold bg-gray-50/80 border-y border-gray-200">
+                                        <th class="py-3 pl-[52px] pr-6 font-medium">Símbolo</th>
+                                        <th class="py-3 px-4 font-medium">Moneda de emisión</th>
+                                        <th class="py-3 px-4 text-right font-medium">Cantidad</th>
+                                        <th class="py-3 px-4 text-right font-medium">Precio</th>
+                                        <th class="py-3 px-4 text-right font-medium">% del total</th>
+                                        <th class="py-3 px-4 text-right font-medium">PPP</th>
+                                        <th class="py-3 px-4 text-right font-medium">Var%</th>
+                                        <th class="py-3 px-4 text-right font-medium">Resultado</th>
+                                        <th class="py-3 px-4 text-center font-medium">Actualizado</th>
+                                        <th class="py-3 px-6 text-right font-medium">Posición</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm">
+                                    <!-- ON ARS -->
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors instrument-row cursor-pointer">
+                                        <td class="py-4 pl-[52px] pr-6">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-chevron-right text-gray-400 text-sm w-4 text-center instrument-icon transition-transform"></i>
+                                                <div>
+                                                    <div class="font-bold text-gray-800">YMCHO</div>
+                                                    <div class="text-[10px] text-gray-500 uppercase">YPF LUZ CLASE 10</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium border border-blue-100">ARS</span></td>
+                                        <td class="py-4 px-4 text-right text-gray-700">5.000</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">124,42</td>
+                                        <td class="py-4 px-4 text-right text-gray-700">5,00%</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">123,42</td>
+                                        <td class="py-4 px-4 text-right text-green-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-up text-[10px]"></i> 0,81%</td>
+                                        <td class="py-4 px-4 text-right text-green-500 val-money">+5.000,00</td>
+                                        <td class="py-4 px-4 text-center text-gray-500 text-xs">14:20:10</td>
+                                        <td class="py-4 px-6 text-right font-medium text-gray-800 val-money">622.125,00</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-100 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">Disponible</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">5.000</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">124,42</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">622.125,00</td>
+                                    </tr>
+
+                                    <!-- ON USD -->
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors instrument-row cursor-pointer">
+                                        <td class="py-4 pl-[52px] pr-6">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-chevron-right text-gray-400 text-sm w-4 text-center instrument-icon transition-transform"></i>
+                                                <div>
+                                                    <div class="font-bold text-gray-800">MTCGO</div>
+                                                    <div class="text-[10px] text-gray-500 uppercase">MASTELLONE HNOS.</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium border border-blue-100">USD</span></td>
+                                        <td class="py-4 px-4 text-right text-gray-700">350</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">1.066,50</td>
+                                        <td class="py-4 px-4 text-right text-gray-700">3,00%</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">1.060,50</td>
+                                        <td class="py-4 px-4 text-right text-green-500 flex items-center justify-end gap-1"><i class="fas fa-arrow-up text-[10px]"></i> 0,56%</td>
+                                        <td class="py-4 px-4 text-right text-green-500 val-money">+2.100,00</td>
+                                        <td class="py-4 px-4 text-center text-gray-500 text-xs">14:20:10</td>
+                                        <td class="py-4 px-6 text-right font-medium text-gray-800 val-money">373.275,00</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-100 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">Disponible</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">350</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">1.066,50</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">373.275,00</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-white text-xs font-bold text-gray-800">
+                                        <td colspan="4" class="py-4 pl-[52px] pr-6 border-b border-gray-100">Subtotal</td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100">8,00%</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100 text-green-600 font-medium val-money">+7.100,00</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-6 text-right border-b border-gray-100"><span class="val-currency text-gray-400 font-medium mr-1">ARS</span><span class="val-money">995.400,00</span></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acordeón 7: Otros -->
+                <div class="accordion-item border-b border-gray-100" data-mercados="argentina" data-monedas="USD">
+                    <div class="accordion-header cursor-pointer hover:bg-gray-50 transition-colors py-4 px-6">
+                        <div class="flex justify-between items-center w-full">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-chevron-right text-blue-600 text-sm w-4 text-center transition-transform duration-200 icon-rotate"></i>
+                                <span class="font-bold text-blue-900 text-lg">Otros</span>
+                                <span class="bg-blue-50 text-blue-600 font-semibold text-xs px-2 py-0.5 rounded">0,24%</span>
+                            </div>
+                            <div class="relative">
+                                <div class="peer text-right cursor-help p-1 rounded hover:bg-gray-200 transition-colors">
+                                    <span class="val-currency text-gray-400 text-xs font-medium mr-1">USD</span>
+                                    <span class="val-money-split font-bold text-gray-800 text-lg" data-is-total="false">23<span class="text-xs font-normal text-gray-500">,64</span></span>
+                                </div>
+                                <div class="popover-content absolute z-50 right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 opacity-0 invisible peer-hover:opacity-100 peer-hover:visible pointer-events-none">
+                                    <div class="p-4">
+                                        <h5 class="text-[10px] font-bold text-blue-800 tracking-wider mb-4 uppercase">Por moneda de emisión</h5>
+                                        <div class="flex justify-between items-center text-sm">
+                                            <div class="flex items-center gap-2 text-gray-700 font-medium">
+                                                <span class="font-bold text-sm text-gray-800">USD</span> <span class="bg-blue-50 text-blue-600 font-semibold text-[10px] px-1.5 py-0.5 rounded">0,24%</span>
+                                            </div>
+                                            <div class="text-right flex items-center justify-end gap-3">
+                                                <span class="val-money text-gray-500 text-xs font-medium">0,00</span>
+                                                <span class="font-bold text-gray-800 text-sm"><span class="val-currency text-xs font-medium text-gray-500 mr-1">USD</span><span class="val-money">23,64</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-content hidden">
+                        <div class="table-container overflow-x-auto w-full pb-2">
+                            <table class="w-full text-left border-collapse min-w-[1000px]">
+                                <thead>
+                                    <tr class="text-xs text-gray-600 font-semibold bg-gray-50/80 border-y border-gray-200">
+                                        <th class="py-3 pl-[52px] pr-6 font-medium">Símbolo</th>
+                                        <th class="py-3 px-4 font-medium">Moneda de emisión</th>
+                                        <th class="py-3 px-4 text-right font-medium">Cantidad</th>
+                                        <th class="py-3 px-4 text-right font-medium">Precio</th>
+                                        <th class="py-3 px-4 text-right font-medium">% del total</th>
+                                        <th class="py-3 px-4 text-right font-medium">PPP <i class="fas fa-info-circle text-blue-500 ml-1"></i></th>
+                                        <th class="py-3 px-4 text-right font-medium">Var%</th>
+                                        <th class="py-3 px-4 text-right font-medium">Resultado</th>
+                                        <th class="py-3 px-4 text-center font-medium">Actualizado</th>
+                                        <th class="py-3 px-6 text-right font-medium">Posición total</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm">
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors instrument-row cursor-pointer">
+                                        <td class="py-4 pl-[52px] pr-6">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-chevron-right text-gray-400 text-sm w-4 text-center instrument-icon transition-transform"></i>
+                                                <div>
+                                                    <div class="font-bold text-gray-800">DOLARUSA</div>
+                                                    <div class="text-[10px] text-gray-500 uppercase">DOLARES USA ESP 7000</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4"><span class="text-blue-500 bg-blue-50 px-2 py-0.5 rounded text-xs font-medium border border-blue-100">USD</span></td>
+                                        <td class="py-4 px-4 text-right text-gray-700">23,64</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">1,00</td>
+                                        <td class="py-4 px-4 text-right text-gray-700">0,24%</td>
+                                        <td class="py-4 px-4 text-right text-gray-700 val-money">1,00</td>
+                                        <td class="py-4 px-4 text-right text-gray-500 flex items-center justify-end gap-1">0,00%</td>
+                                        <td class="py-4 px-4 text-right text-gray-500 val-money">0,00</td>
+                                        <td class="py-4 px-4 text-center text-gray-400 text-xs">15:00</td>
+                                        <td class="py-4 px-6 text-right font-medium text-gray-800 val-money">23,64</td>
+                                    </tr>
+                                    <tr class="instrument-detail hidden border-b border-gray-100 bg-gray-50/40 text-xs">
+                                        <td class="py-2.5 pl-[80px] pr-6 text-gray-600 font-medium"><span class="border-l-2 border-gray-300 pl-2">Disponible</span></td>
+                                        <td class="py-2.5 px-4"></td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600">23,64</td>
+                                        <td class="py-2.5 px-4 text-right text-gray-600 val-money">1,00</td>
+                                        <td colspan="5"></td>
+                                        <td class="py-2.5 px-6 text-right text-gray-600 val-money">23,64</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-white text-xs font-bold text-gray-800">
+                                        <td colspan="4" class="py-4 pl-[52px] pr-6 border-b border-gray-100">Subtotal</td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100">0,24%</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-4 text-right border-b border-gray-100 text-gray-500 font-medium">-</td>
+                                        <td class="py-4 px-4 border-b border-gray-100"></td>
+                                        <td class="py-4 px-6 text-right border-b border-gray-100"><span class="val-currency text-gray-400 font-medium mr-1">USD</span><span class="val-money">23,64</span></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
             </div>
+
+            <!-- Empty State (Oculto por defecto) -->
+            <div id="empty-state" class="hidden flex-col items-center justify-center py-16 px-4 text-center border-t border-gray-200">
+                <div class="bg-gray-50 p-4 rounded-full mb-4">
+                    <i class="fas fa-search text-3xl text-gray-400"></i>
+                </div>
+                <h4 class="text-lg font-bold text-gray-700 mb-1">Sin resultados</h4>
+                <p class="text-sm text-gray-500 max-w-md">No encontramos inversiones que coincidan con los filtros seleccionados de mercado y moneda de emisión.</p>
+                <button id="btn-clear-filters" class="mt-6 px-4 py-2 border border-gray-300 text-sm font-medium text-blue-600 bg-white rounded-md hover:bg-blue-50 transition-colors">
+                    Limpiar filtros
+                </button>
+            </div>
             
-            <div class="mt-8 text-[11px] text-gray-400">
+            <div class="mt-8 text-[11px] text-gray-400 px-6">
                 Los porcentajes se calculan sobre el <strong class="text-gray-500">total de tu cuenta</strong> (inversiones + dinero disponible).
             </div>
         </div>
@@ -459,28 +1087,343 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const headers = document.querySelectorAll('.accordion-header');
+            const allItems = document.querySelectorAll('.accordion-item');
+            
+            // --- INICIALIZACIÓN Y LÓGICA DE MONEDA (CONVERSIÓN) ---
+            const rate = 1460;
+            const btnArs = document.getElementById('btn-currency-ars');
+            const btnUsd = document.getElementById('btn-currency-usd');
+            const infoIcon = document.getElementById('usd-info-icon');
 
-            headers.forEach(header => {
-                header.addEventListener('click', (e) => {
-                    // Prevenir toggle de accordion si se hace click en el contenedor que activa el hover
-                    if(e.target.closest('.peer')) return;
+            // Leer todos los valores originales en HTML y guardarlos como atributos
+            document.querySelectorAll('.val-money').forEach(el => {
+                let text = el.textContent.trim();
+                let sign = '';
+                if (text.startsWith('+') || text.startsWith('-')) {
+                    sign = text[0];
+                    text = text.substring(1);
+                }
+                let val = parseFloat(text.replace(/\./g, '').replace(',', '.'));
+                if (!isNaN(val)) {
+                    el.dataset.ars = val;
+                    el.dataset.sign = sign;
+                }
+            });
 
-                    const content = header.nextElementSibling;
-                    const icon = header.querySelector('.icon-rotate');
-                    
-                    if (content.classList.contains('hidden')) {
-                        content.classList.remove('hidden');
-                        content.classList.add('block');
-                        icon.classList.remove('fa-chevron-right');
-                        icon.classList.add('fa-chevron-down');
+            document.querySelectorAll('.val-money-split').forEach(el => {
+                let text = el.textContent.trim();
+                let val = parseFloat(text.replace(/\./g, '').replace(',', '.'));
+                if (!isNaN(val)) {
+                    el.dataset.ars = val;
+                }
+            });
+
+            // Función maestra de conversión
+            function updateCurrency(currency) {
+                const isUSD = currency === 'USD';
+                
+                // Actualizar Botones y Tooltip
+                if (isUSD) {
+                    btnUsd.classList.add('bg-white', 'text-blue-800', 'shadow-sm');
+                    btnUsd.classList.remove('text-gray-500', 'hover:text-gray-700');
+                    btnArs.classList.remove('bg-white', 'text-blue-800', 'shadow-sm');
+                    btnArs.classList.add('text-gray-500', 'hover:text-gray-700');
+                    infoIcon.classList.remove('hidden');
+                } else {
+                    btnArs.classList.add('bg-white', 'text-blue-800', 'shadow-sm');
+                    btnArs.classList.remove('text-gray-500', 'hover:text-gray-700');
+                    btnUsd.classList.remove('bg-white', 'text-blue-800', 'shadow-sm');
+                    btnUsd.classList.add('text-gray-500', 'hover:text-gray-700');
+                    infoIcon.classList.add('hidden');
+                }
+
+                // Actualizar Etiquetas de "Expresar en"
+                document.querySelectorAll('.val-currency').forEach(el => {
+                    el.textContent = currency;
+                });
+
+                // Convertir y formatear valores simples (Tablas)
+                document.querySelectorAll('.val-money').forEach(el => {
+                    if (el.dataset.ars !== undefined) {
+                        let val = parseFloat(el.dataset.ars);
+                        if (isUSD) val = val / rate;
+                        
+                        let formatted = val.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        if (el.dataset.sign) formatted = el.dataset.sign + formatted;
+                        
+                        el.textContent = formatted;
+                    }
+                });
+
+                // Convertir y formatear valores separados por un span (Totales gigantes)
+                document.querySelectorAll('.val-money-split').forEach(el => {
+                    if (el.dataset.ars !== undefined) {
+                        let val = parseFloat(el.dataset.ars);
+                        if (isUSD) val = val / rate;
+                        
+                        let formatted = val.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        let parts = formatted.split(',');
+                        let isTotal = el.dataset.isTotal === 'true';
+                        let sizeClass = isTotal ? 'text-sm' : 'text-xs';
+                        
+                        el.innerHTML = `${parts[0]}<span class="${sizeClass} font-normal text-gray-500">,${parts[1]}</span>`;
+                    }
+                });
+            }
+
+            // Asignar listeners a los botones de moneda
+            btnArs.addEventListener('click', () => updateCurrency('ARS'));
+            btnUsd.addEventListener('click', () => updateCurrency('USD'));
+
+
+            // --- LÓGICA DE FILTROS ---
+            const filterMercado = document.getElementById('filter-mercado');
+            const filterMoneda = document.getElementById('filter-moneda');
+            const emptyState = document.getElementById('empty-state');
+            const btnClearFilters = document.getElementById('btn-clear-filters');
+
+            function applyFilters() {
+                const mercadoVal = filterMercado.value;
+                const monedaVal = filterMoneda.value;
+                let visibleCount = 0;
+
+                allItems.forEach(item => {
+                    const itemMercados = item.dataset.mercados ? item.dataset.mercados.split(',') : [];
+                    const itemMonedas = item.dataset.monedas ? item.dataset.monedas.split(',') : [];
+
+                    const matchMercado = mercadoVal === 'todos' || itemMercados.includes(mercadoVal);
+                    const matchMoneda = monedaVal === 'todos' || itemMonedas.includes(monedaVal);
+
+                    if (matchMercado && matchMoneda) {
+                        item.style.display = '';
+                        visibleCount++;
                     } else {
-                        content.classList.add('hidden');
-                        content.classList.remove('block');
-                        icon.classList.remove('fa-chevron-down');
-                        icon.classList.add('fa-chevron-right');
+                        item.style.display = 'none';
+                    }
+                });
+
+                // Mostrar u ocultar el Empty State
+                if (visibleCount === 0) {
+                    emptyState.classList.remove('hidden');
+                    emptyState.classList.add('flex');
+                } else {
+                    emptyState.classList.add('hidden');
+                    emptyState.classList.remove('flex');
+                }
+            }
+
+            filterMercado.addEventListener('change', applyFilters);
+            filterMoneda.addEventListener('change', applyFilters);
+
+            // Botón rápido para limpiar filtros desde el empty state
+            if (btnClearFilters) {
+                btnClearFilters.addEventListener('click', () => {
+                    filterMercado.value = 'todos';
+                    filterMoneda.value = 'todos';
+                    applyFilters();
+                });
+            }
+
+
+            // --- LÓGICA DE VISUALIZACIÓN DE ACORDEONES ---
+            
+            // Elementos del split button
+            const btnToggleAllMain = document.getElementById('btn-toggle-all-main');
+            const btnDropdownToggle = document.getElementById('btn-dropdown-toggle');
+            const dropdownMenu = document.getElementById('dropdown-menu');
+            const btnExpandCategories = document.getElementById('btn-expand-categories');
+            const btnExpandDetails = document.getElementById('btn-expand-details');
+            const btnCollapseAll = document.getElementById('btn-collapse-all');
+
+            // Abrir o cerrar todo por completo desde el botón principal del icono
+            btnToggleAllMain.addEventListener('click', () => {
+                let allFullyOpen = true;
+                const visibleItems = Array.from(allItems).filter(item => item.style.display !== 'none');
+                
+                visibleItems.forEach(item => {
+                    const content = item.querySelector('.accordion-content');
+                    if (content && content.classList.contains('hidden')) {
+                        allFullyOpen = false;
+                    }
+                });
+
+                const shouldOpen = !allFullyOpen;
+
+                visibleItems.forEach(item => {
+                    const content = item.querySelector('.accordion-content');
+                    const icon = item.querySelector('.icon-rotate');
+
+                    if (!content) return;
+
+                    if (!shouldOpen) {
+                        // Collapse everything
+                        content.classList.remove('block'); content.classList.add('hidden');
+                        if (icon) { icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-right'); }
+                    } else {
+                        // Expand up to categories (instruments visible, details hidden)
+                        content.classList.remove('hidden'); content.classList.add('block');
+                        if (icon) { icon.classList.remove('fa-chevron-right'); icon.classList.add('fa-chevron-down'); }
+                        
+                        // Force collapse all individual instruments details
+                        const instrumentRows = item.querySelectorAll('.instrument-row');
+                        instrumentRows.forEach(row => {
+                            const instrIcon = row.querySelector('.instrument-icon');
+                            if (instrIcon) {
+                                instrIcon.classList.remove('fa-chevron-down'); instrIcon.classList.add('fa-chevron-right');
+                            }
+                            let next = row.nextElementSibling;
+                            while (next && next.classList.contains('instrument-detail')) {
+                                next.classList.add('hidden');
+                                next = next.nextElementSibling;
+                            }
+                        });
                     }
                 });
             });
+
+            // Toggle del menú desplegable del caret
+            btnDropdownToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('hidden');
+            });
+
+            // Cerrar menú al hacer click fuera
+            document.addEventListener('click', (e) => {
+                if (!dropdownMenu.contains(e.target)) {
+                    dropdownMenu.classList.add('hidden');
+                }
+            });
+
+            // Opción: Expandir sólo categorías (muestra las tablas, oculta los sub-detalles)
+            btnExpandCategories.addEventListener('click', () => {
+                const visibleItems = Array.from(allItems).filter(item => item.style.display !== 'none');
+                
+                visibleItems.forEach(item => {
+                    const content = item.querySelector('.accordion-content');
+                    const icon = item.querySelector('.icon-rotate');
+                    
+                    if (!content) return;
+
+                    content.classList.remove('hidden'); content.classList.add('block');
+                    if (icon) { icon.classList.remove('fa-chevron-right'); icon.classList.add('fa-chevron-down'); }
+
+                    // Cerramos explícitamente los detalles de instrumentos
+                    const instrumentRows = item.querySelectorAll('.instrument-row');
+                    instrumentRows.forEach(row => {
+                        const instrIcon = row.querySelector('.instrument-icon');
+                        if (instrIcon) {
+                            instrIcon.classList.remove('fa-chevron-down'); instrIcon.classList.add('fa-chevron-right');
+                        }
+                        let next = row.nextElementSibling;
+                        while (next && next.classList.contains('instrument-detail')) {
+                            next.classList.add('hidden');
+                            next = next.nextElementSibling;
+                        }
+                    });
+                });
+                dropdownMenu.classList.add('hidden');
+            });
+
+            // Opción: Expandir detalles (muestra absolutamente todo)
+            btnExpandDetails.addEventListener('click', () => {
+                const visibleItems = Array.from(allItems).filter(item => item.style.display !== 'none');
+                
+                visibleItems.forEach(item => {
+                    const content = item.querySelector('.accordion-content');
+                    const icon = item.querySelector('.icon-rotate');
+
+                    if (!content) return;
+
+                    content.classList.remove('hidden'); content.classList.add('block');
+                    if (icon) { icon.classList.remove('fa-chevron-right'); icon.classList.add('fa-chevron-down'); }
+
+                    // Abrimos los detalles de cada instrumento
+                    const instrumentRows = item.querySelectorAll('.instrument-row');
+                    instrumentRows.forEach(row => {
+                        const instrIcon = row.querySelector('.instrument-icon');
+                        if (instrIcon) {
+                            instrIcon.classList.remove('fa-chevron-right'); instrIcon.classList.add('fa-chevron-down');
+                        }
+                        let next = row.nextElementSibling;
+                        while (next && next.classList.contains('instrument-detail')) {
+                            next.classList.remove('hidden');
+                            next = next.nextElementSibling;
+                        }
+                    });
+                });
+                dropdownMenu.classList.add('hidden');
+            });
+
+            // Opción: Contraer todo (vuelve a solo los encabezados principales)
+            btnCollapseAll.addEventListener('click', () => {
+                const visibleItems = Array.from(allItems).filter(item => item.style.display !== 'none');
+                
+                visibleItems.forEach(item => {
+                    const content = item.querySelector('.accordion-content');
+                    const icon = item.querySelector('.icon-rotate');
+
+                    if (!content) return;
+
+                    content.classList.remove('block'); content.classList.add('hidden');
+                    if (icon) { icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-right'); }
+                });
+                dropdownMenu.classList.add('hidden');
+            });
+
+            // Toggle individual de los headers de acordeones principales (Categorías)
+            headers.forEach(header => {
+                header.addEventListener('click', (e) => {
+                    // Evitar que el clic en el área del tooltip cierre el acordeón
+                    if(e.target.closest('.peer')) return;
+
+                    const item = header.closest('.accordion-item');
+                    const content = item.querySelector('.accordion-content');
+                    const icon = header.querySelector('.icon-rotate');
+                    
+                    if (!content) return;
+
+                    if (content.classList.contains('hidden')) {
+                        content.classList.remove('hidden');
+                        content.classList.add('block');
+                        if (icon) { icon.classList.remove('fa-chevron-right'); icon.classList.add('fa-chevron-down'); }
+                    } else {
+                        content.classList.add('hidden');
+                        content.classList.remove('block');
+                        if (icon) { icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-right'); }
+                    }
+                });
+            });
+
+            // Toggle individual de las filas de instrumentos (Sub-acordeones)
+            const instrumentRows = document.querySelectorAll('.instrument-row');
+            instrumentRows.forEach(row => {
+                row.addEventListener('click', () => {
+                    const icon = row.querySelector('.instrument-icon');
+                    if (!icon) return;
+
+                    const isExpanded = icon.classList.contains('fa-chevron-down');
+
+                    if (isExpanded) {
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-right');
+                    } else {
+                        icon.classList.remove('fa-chevron-right');
+                        icon.classList.add('fa-chevron-down');
+                    }
+
+                    let next = row.nextElementSibling;
+                    // Recorremos todos los elementos hermanos que sigan teniendo la clase "instrument-detail"
+                    while (next && next.classList.contains('instrument-detail')) {
+                        if (isExpanded) {
+                            next.classList.add('hidden');
+                        } else {
+                            next.classList.remove('hidden');
+                        }
+                        next = next.nextElementSibling;
+                    }
+                });
+            });
+
         });
     </script>
 </body>
